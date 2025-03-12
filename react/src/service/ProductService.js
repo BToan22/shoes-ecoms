@@ -9,17 +9,22 @@ export default class ProductService {
             .then((res) => res.data);
     }
 
-    getById(id) {
+    getDetail(id) {
         return axios
             .get(`${API_URL}/products/${id}`)
             .then((res) => res.data);
     }
 
-    // add({ name, description, price }) {
-    //     return axios
-    //         .post(`${API_URL}/products`, { name, description, price })
-    //         .then((res) => res.data);
-    // }
+    add(formData) {
+        for (let pair of formData.entries()) {
+            console.log(pair[0], pair[1]);
+        }
+        return axios
+            .post(`${API_URL}/products/add`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+            .then((res) => res.data);
+    }
 
     // update({ id, name, description, price }) {
     //     return axios

@@ -7,6 +7,9 @@ import { RouterProvider } from "react-router-dom";
 // import { ContextProvider } from "./contexts/ContextProvider";
 // import "./index.css";
 import router from "./router";
+import { AuthContext } from "./context/AuthContext";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     // <React.StrictMode>
@@ -14,6 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
     //     </ContextProvider>
     // </React.StrictMode>
-
-    <RouterProvider router={router} />
+    <AuthContext>
+        <RouterProvider router={router} />
+    </AuthContext>
 );
