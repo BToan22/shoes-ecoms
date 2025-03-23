@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const API_URL = "http://127.0.0.1:8000/api";
 
@@ -7,65 +6,40 @@ export default class AuthService {
     register(userData) {
         return axios
             .post(`${API_URL}/register`, userData)
-            .then((response) => response.data)
-            .catch((error) => {
-                console.error("Error register:", error);
-                throw error;
+            .then((res) => res.data)
+            .catch((err) => {
+                console.error("Registration Error:", err);
+                throw err;
             });
     }
 
-
-    login(credentials) {
+    login(email, password) {
         return axios
-            .post(`${API_URL}/login`, credentials)
-            .then((response) => {
-                if (response.data.status === 200) {
-                    localStorage.setItem(
-                        "user",
-                        JSON.stringify(response.data.data.user)
-                    );
+            .post(`${API_URL}/login`, { email, password })
+            .then((res) => {
+                if (res.data.token) {
+                    return res.data.token;
                 }
-                return response.data;
+                throw new Error("Invalid credentials");
             })
-            .catch((error) => {
-                console.error("Error Login:", error);
-                throw error;
+            .catch((err) => {
+                console.error("Login Error:", err);
+                throw err;
             });
     }
 
-
+    getUser(token) {
+        return axios
+            .get(`${API_URL}/user`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => res.data)
+            .catch((err) => {
+                console.error("Fetch User Error:", err);
+                throw err;
+            });
+    }
     logout() {
-        return axios
-            .post(`${API_URL}/logout`)
-            .then((response) => {
-                localStorage.removeItem("user");
-                return response.data;
-            })
-            .catch((error) => {
-                console.error("Error Logout:", error);
-                throw error;
-            });
-    }
-
-    getCurrentUser() {
-        return new Promise((resolve, reject) => {
-            const auth = getAuth();
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    resolve(user);
-                } else {
-                    reject("No authenticated user found");
-                }
-            });
-        });
-    }
-    getUserData(uid) {
-        return axios
-            .post(`${API_URL}/me`, { uid })
-            .then((response) => response.data)
-            .catch((error) => {
-                console.error("Error fetching user data:", error);
-                throw error;
-            });
+        localStorage.removeItem("token");
     }
 }

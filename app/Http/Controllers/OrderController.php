@@ -67,7 +67,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => $request->user_id,
                 'total_amount' => $totalAmount,
-                'status' => 'pending',
+                'status' => 'to Pay',
             ]);
 
             Log::info('Order created:', ['order_id' => $order->id]);
@@ -106,21 +106,21 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,processing,completed,cancelled',
-        ]);
+    // public function updateStatus(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'status' => 'required|in:to Pay,to Ship,completed,cancelled,to Receive',
+    //     ]);
 
-        $order = Order::find($id);
-        if (!$order) {
-            return response()->json(['error' => 'Order not found'], 404);
-        }
+    //     $order = Order::find($id);
+    //     if (!$order) {
+    //         return response()->json(['error' => 'Order not found'], 404);
+    //     }
 
-        $order->update(['status' => $request->status]);
+    //     $order->update(['status' => $request->status]);
 
-        return response()->json(['message' => 'Order status updated successfully!']);
-    }
+    //     return response()->json(['message' => 'Order status updated successfully!']);
+    // }
 
     public function destroy($id)
     {
@@ -155,20 +155,37 @@ class OrderController extends Controller
         return response()->json($orders);
     }
     public function cancelOrder($orderId)
-{
-    $order = Order::find($orderId);
+    {
+        $order = Order::find($orderId);
 
-    if (!$order) {
-        return response()->json(['error' => 'Order not found'], 404);
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        if ($order->status !== 'pending') {
+            return response()->json(['error' => 'Only pending orders can be canceled'], 400);
+        }
+
+        $order->update(['status' => 'cancelled']);
+
+        return response()->json(['message' => 'Order has been canceled']);
     }
+    public function updateStatus(Request $request, $orderId)
+    {
+        Log::info($request->all());
+        $order = Order::find($orderId);
 
-    if ($order->status !== 'pending') {
-        return response()->json(['error' => 'Only pending orders can be canceled'], 400);
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:to Ship,to Receive,Completed,Canceled,to Pay'
+        ]);
+
+        $order->status = $validated['status'];
+        $order->save();
+
+        return response()->json(['message' => 'Order status updated successfully', 'order' => $order], 200);
     }
-
-    $order->update(['status' => 'cancelled']);
-
-    return response()->json(['message' => 'Order has been canceled']);
-}
-
 }

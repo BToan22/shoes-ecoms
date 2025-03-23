@@ -5,10 +5,12 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import NewSneaker from "../components/NewSneaker";
 import SneakerDisplay from "../components/SneakerDisplay";
+import Banner from "../components/Banner";
 
 const HomePage = () => {
     return (
         <div className="home-container">
+            <Banner />
             <SneakerDisplay />
             <NewSneaker />
         </div>

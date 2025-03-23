@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
+import { AuthContext } from "../context/AuthContext";
 import OrderService from "../service/OrderService";
-import AuthService from "../service/AuthService";
+import PaymentService from "../service/PaymentService";
 
 const orderService = new OrderService();
-const authservice = new AuthService();
+const paymentService = new PaymentService();
 
 const Checkout = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     const { product, quantity } = location.state || {};
 
@@ -19,31 +21,16 @@ const Checkout = () => {
     const [paymentMethod, setPaymentMethod] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const currentUser = await authservice.getCurrentUser();
-                if (currentUser) {
-                    const userData = await authservice.getUserData(
-                        currentUser.uid
-                    );
-                    console.log("User Data:", userData);
-
-                    const extractedUserId = userData?.data?.user?.id;
-                    console.log("Extracted User ID:", extractedUserId);
-
-                    setUserId(extractedUserId);
-                }
-            } catch (err) {
-                console.error("Failed to fetch user data:", err);
-                setError("Unable to fetch user data.");
-            }
-        };
-
-        fetchUserData();
-    }, []);
+        if (!user) {
+            navigate("/login");
+        } else {
+            setFullName(user.name || "");
+            setAddress(user.address || "");
+            setPhoneNumber(user.phone || "");
+        }
+    }, [user, navigate]);
 
     if (!product) {
         return <h2 className="text-center mt-5">No products are selected!</h2>;
@@ -55,8 +42,9 @@ const Checkout = () => {
             return;
         }
 
-        if (!userId) {
+        if (!user?.id) {
             setError("User ID not found. Please log in again.");
+            navigate("/login");
             return;
         }
 
@@ -64,21 +52,38 @@ const Checkout = () => {
         setError("");
 
         const orderData = {
-            user_id: userId,
-            items: [
-                {
-                    product_id: product.id,
-                    quantity: quantity,
-                },
-            ],
+            user_id: user.id,
+            items: [{ product_id: product.id, quantity: quantity }],
         };
 
         try {
-            const response = await orderService.addOrder(orderData);
-            console.log("Order Created:", response);
-            navigate("/order");
+            const orderResponse = await orderService.addOrder(orderData);
+            console.log(orderResponse);
+            if (paymentMethod === "Momo") {
+                await paymentService.createMomoPayment(
+                    product.price * quantity
+                );
+            } else if (paymentMethod === "Credit Card") {
+                const paymentResponse =
+                    await paymentService.createCreditCardPayment(
+                        product.price * quantity
+                    );
+
+                console.log(paymentResponse);
+
+                if (paymentResponse?.session_id &&paymentResponse?.url ) {
+                    await paymentService.createPaymentRecord(
+                        orderResponse.order.id,
+                        paymentResponse.session_id,
+                        product.price * quantity,
+                        "Credit Card"
+                    );
+                    window.location.href = paymentResponse.url;
+                } else {
+                    setError("Unable to proceed with payment.");
+                }
+            }
         } catch (err) {
-            console.error("Order Creation Error:", err);
             setError("Failed to place order. Please try again.");
         } finally {
             setLoading(false);
@@ -88,9 +93,7 @@ const Checkout = () => {
     return (
         <Container className="mt-5 pt-5 mb-5">
             <h2 className="text-center fw-bold">Delivery Address</h2>
-
             {error && <Alert variant="danger">{error}</Alert>}
-
             <Form className="mb-4">
                 <Form.Group controlId="fullName">
                     <Form.Label className="fw-bold">Full Name:</Form.Label>
@@ -99,9 +102,9 @@ const Checkout = () => {
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Enter your full name"
                     />
                 </Form.Group>
-
                 <Form.Group controlId="address" className="mt-3">
                     <Form.Label className="fw-bold">Address:</Form.Label>
                     <Form.Control
@@ -109,9 +112,9 @@ const Checkout = () => {
                         required
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Enter your address"
                     />
                 </Form.Group>
-
                 <Form.Group controlId="phoneNumber" className="mt-3">
                     <Form.Label className="fw-bold">Phone Number:</Form.Label>
                     <Form.Control
@@ -119,10 +122,10 @@ const Checkout = () => {
                         required
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="Enter your phone number"
                     />
                 </Form.Group>
             </Form>
-
             <Row className="mt-4 border p-4 shadow-sm rounded bg-light">
                 <Col md={4} className="text-center">
                     <img
@@ -143,7 +146,6 @@ const Checkout = () => {
                     </h4>
                 </Col>
             </Row>
-
             <Form.Group controlId="paymentMethod" className="mt-4">
                 <Form.Label className="fw-bold">Payment Method</Form.Label>
                 <Form.Select
@@ -154,9 +156,9 @@ const Checkout = () => {
                     <option>Credit Card</option>
                     <option>PayPal</option>
                     <option>Cash on Delivery</option>
+                    <option>Momo</option>
                 </Form.Select>
             </Form.Group>
-
             <div className="d-flex justify-content-end mt-4">
                 <Button
                     variant="dark"

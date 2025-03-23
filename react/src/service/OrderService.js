@@ -47,4 +47,14 @@ export default class OrderService {
                 throw error;
             });
     }
+    updateOrderStatus(orderId, status) {
+        console.log(orderId, status);
+        return axios
+            .put(`${API_URL}/orders/${orderId}/status`, { status })
+            .then((res) => res.data)
+            .catch((err) => {
+                console.error("Error updating order status:", err);
+                throw err;
+            });
+    }
 }

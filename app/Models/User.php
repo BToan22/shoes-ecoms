@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'uid',
         'name',
         'email',
         'password',
@@ -30,6 +30,24 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [
+            'id' => $this->getKey(),
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'address' => $this->address,
+            'is_super_admin' => $this->is_super_admin,
         ];
     }
 }

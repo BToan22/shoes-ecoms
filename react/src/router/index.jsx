@@ -14,6 +14,8 @@ import MainLayout from "../components/layout/MainLayout";
 import Checkout from "../views/Checkout";
 import Order from "../views/Order";
 
+import PaymentStatus from "../components/PaymentStatus";
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -23,7 +25,8 @@ const router = createBrowserRouter([
             { path: "/product", element: <Product /> },
             { path: "/product/:id", element: <DetailProduct /> },
             { path: "/checkout", element: <Checkout /> },
-            {path:"/order",element:<Order/>},
+            { path: "/order", element: <Order /> },
+            { path: "/payment-status", element: <PaymentStatus /> },
         ],
     },
 

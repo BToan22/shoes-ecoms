@@ -1,28 +1,35 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../auth";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { createContext, useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+const AuthProvider = ({ children }) => {
+    const [isLoggedIn, setIsLoggedIn] = useState(
+        !!localStorage.getItem("token")
+    );
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-        return () => unsubscribe();
-    }, []);
+    const [user, setUser] = useState(() => {
+        const token = localStorage.getItem("token");
+        return token ? jwtDecode(token) : null;
+    });
 
-    const logout = async () => {
-        await signOut(auth);
+    const login = (token) => {
+        localStorage.setItem("token", token);
+        setIsLoggedIn(true);
+        setUser(jwtDecode(token));
+    };
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+        setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export default AuthProvider;

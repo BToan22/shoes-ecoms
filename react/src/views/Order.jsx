@@ -1,41 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Form, Spinner, Button } from "react-bootstrap";
 import OrderService from "../service/OrderService";
-import AuthService from "../service/AuthService";
+import { AuthContext } from "../context/AuthContext";
 
 const orderservice = new OrderService();
-const authservice = new AuthService();
 
 const Order = () => {
+    const { user } = useContext(AuthContext);
     const [orders, setOrders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
-    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const currentUser = await authservice.getCurrentUser();
-                if (currentUser) {
-                    const userData = await authservice.getUserData(
-                        currentUser.uid
-                    );
-                    setUserId(userData?.data?.user?.id);
-                }
-            } catch (err) {
-                console.error("Failed to fetch user data:", err);
-            }
-        };
-
-        fetchUserData();
-    }, []);
-
-    useEffect(() => {
+        console.log(user);
         const fetchOrders = async () => {
-            if (!userId) return;
-
+            if (!user?.id) return;
             try {
-                const data = await orderservice.getOrdersByUser(userId);
+                const data = await orderservice.getOrdersByUser(user.id);
                 setOrders(data);
             } catch (error) {
                 console.error("Error fetching orders:", error);
@@ -45,18 +26,18 @@ const Order = () => {
         };
 
         fetchOrders();
-    }, [userId]);
+    }, [user?.id]);
 
     const handleCancelOrder = async (orderId) => {
         if (!window.confirm("Are you sure you want to cancel this order?"))
             return;
 
         try {
-            await orderservice.cancelOrder(orderId);
+            await orderservice.updateOrderStatus(orderId, "Canceled");
             setOrders((prevOrders) =>
                 prevOrders.map((order) =>
                     order.id === orderId
-                        ? { ...order, status: "canceled" }
+                        ? { ...order, status: "Canceled" }
                         : order
                 )
             );
@@ -149,7 +130,7 @@ const Order = () => {
                             </Row>
                         ))}
 
-                        {order.status === "pending" && (
+                        {order.status === "to Pay" && (
                             <div className="text-end mt-3">
                                 <Button
                                     variant="danger"

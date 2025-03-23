@@ -4,8 +4,10 @@ import { Container, Row, Col, Button, Form } from "react-bootstrap";
 // import Navbar from "../components/Navbar";
 import Footer from "./Footer";
 import ProductService from "../service/ProductService";
+import OrderService from "../service/OrderService";
 
 const productService = new ProductService();
+const orderService= new OrderService();
 
 const DetailProduct = () => {
     const { id } = useParams();
@@ -22,7 +24,12 @@ const DetailProduct = () => {
     }, [id]);
 
     const handleBuyNow = () => {
-        navigate("/checkout", { state: { product, quantity } });
+        if (!size) {
+            alert("Please select a size before proceeding!");
+            return;
+        } else {
+            navigate("/checkout", { state: { product, quantity } });
+        }
     };
 
     if (!product) {
