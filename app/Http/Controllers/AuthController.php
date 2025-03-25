@@ -28,7 +28,7 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
-        $token = JWTAuth::fromUser($user); 
+        $token = JWTAuth::fromUser($user);
 
         return response()->json(['user' => $user, 'token' => $token], 201);
     }
@@ -49,9 +49,18 @@ class AuthController extends Controller
         return response()->json(Auth::guard('api')->user());
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::guard('api')->logout();
-        return response()->json(['message' => 'Logged out successfully']);
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+
+            return response()->json([
+                'message' => 'Successfully logged out. Token has been blacklisted.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to logout. Token might be invalid or expired.'
+            ]);
+        }
     }
 }

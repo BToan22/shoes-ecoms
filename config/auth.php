@@ -14,9 +14,10 @@ return [
         ],
 
         'api' => [
-            'driver' => 'jwt', // Đảm bảo sử dụng JWT nếu bạn dùng Laravel JWT Auth
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
+        
     ],
 
     'providers' => [

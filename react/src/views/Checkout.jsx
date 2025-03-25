@@ -23,6 +23,7 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        console.log(user);
         if (!user) {
             navigate("/login");
         } else {

@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import axiosClient from "../../axiosClient";
 const API_URL = "http://127.0.0.1:8000/api";
 
 export default class AuthService {
@@ -28,18 +28,22 @@ export default class AuthService {
             });
     }
 
-    getUser(token) {
-        return axios
-            .get(`${API_URL}/user`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+    getUser() {
+        return axiosClient
+            .get("/user")
             .then((res) => res.data)
             .catch((err) => {
                 console.error("Fetch User Error:", err);
                 throw err;
             });
     }
-    logout() {
-        localStorage.removeItem("token");
+
+    async logout() {
+        try {
+            await axiosClient.post("/logout");
+            localStorage.removeItem("token");
+        } catch (err) {
+            console.error("Logout Error:", err);
+        }
     }
 }

@@ -4,9 +4,6 @@ import { FaShoppingCart } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import logo from "../assets/images/logo.png";
-import banner1 from "../assets/images/image.png";
-import banner2 from "../assets/images/banner2.jpg";
-import banner3 from "../assets/images/banner3.jpg";
 
 const Header = () => {
     const { user, isLoggedIn, logout } = useContext(AuthContext);
@@ -31,7 +28,7 @@ const Header = () => {
                     </Nav.Link>
                     <Nav.Link href="#">Contact</Nav.Link>
 
-                    {user?.is_admin && (
+                    {user?.is_admin ===1 && (
                         <Nav.Link as={Link} to="/admin">
                             Manage
                         </Nav.Link>
@@ -63,7 +60,7 @@ const Header = () => {
                         </>
                     ) : (
                         <Nav.Link as={Link} to="/login">
-                            Account
+                            Login
                         </Nav.Link>
                     )}
 

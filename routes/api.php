@@ -13,7 +13,6 @@ use App\Http\Controllers\PaymentController;
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
-Route::post('/products/add', [ProductController::class, 'add']);
 Route::post('/upload-image', [ProductController::class, 'uploadImage']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/me', [AuthController::class, 'me']);
@@ -25,8 +24,6 @@ Route::put('/orders/{orderId}/status', [OrderController::class, 'updateStatus'])
 
 // Route::post ()
 
-use App\Http\Controllers\MomoController;
-
 Route::post('/momo-payment', [PaymentController::class, 'createPaymentMomo']);
 Route::post('/momo-ipn', [PaymentController::class, 'ipnCallback'])->name('momo.ipn');
 Route::post('/stripe/checkout', [PaymentController::class, 'createCheckoutSession']);
@@ -36,11 +33,11 @@ Route::post('/payments/update-status', [PaymentController::class, 'updateStatusP
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/user', [AuthController::class, 'userProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-
-
-
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/products/add', [ProductController::class, 'add']);
+});

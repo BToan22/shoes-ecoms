@@ -17,7 +17,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'phone',
         'address',
-        'is_super_admin',
+        'is_admin',
     ];
 
     protected $hidden = [
@@ -47,7 +47,7 @@ class User extends Authenticatable implements JWTSubject
             'email' => $this->email,
             'phone' => $this->phone,
             'address' => $this->address,
-            'is_super_admin' => $this->is_super_admin,
+            'is_admin' => $this->is_admin,
         ];
     }
 }

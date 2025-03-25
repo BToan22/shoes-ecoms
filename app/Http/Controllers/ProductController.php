@@ -7,6 +7,8 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ProductImage;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ProductController extends Controller
 {
@@ -32,7 +34,6 @@ class ProductController extends Controller
     public function add(Request $request)
     {
         Log::info('Bắt đầu lưu sản phẩm', ['request_data' => $request->all()]);
-
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'brand' => 'required|string|max:255',

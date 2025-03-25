@@ -13,6 +13,8 @@ import DetailProduct from "../components/DetailProduct";
 import MainLayout from "../components/layout/MainLayout";
 import Checkout from "../views/Checkout";
 import Order from "../views/Order";
+import AdminRoute from "../components/AdminRoute";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 import PaymentStatus from "../components/PaymentStatus";
 
@@ -24,23 +26,37 @@ const router = createBrowserRouter([
             { path: "/", element: <HomePage /> },
             { path: "/product", element: <Product /> },
             { path: "/product/:id", element: <DetailProduct /> },
-            { path: "/checkout", element: <Checkout /> },
-            { path: "/order", element: <Order /> },
-            { path: "/payment-status", element: <PaymentStatus /> },
+        ],
+    },
+    {
+        path: "/",
+        element: <ProtectedRoute />,
+        children: [
+            {
+                path: "/",
+                element: <MainLayout />,
+                children: [
+                    { path: "/checkout", element: <Checkout /> },
+                    { path: "/order", element: <Order /> },
+                    { path: "/payment-status", element: <PaymentStatus /> },
+                ],
+            },
         ],
     },
 
     {
         path: "/admin",
-        element: (
-            // <PrivateRoute>
-            <AdminLayout />
-            // </PrivateRoute>
-        ),
+        element: <AdminRoute />,
         children: [
-            { path: "dashboard", element: <Dashboard /> },
-            { path: "products", element: <Products /> },
-            { path: "orders", element: <Orders /> },
+            {
+                path: "/admin",
+                element: <AdminLayout />,
+                children: [
+                    { path: "dashboard", element: <Dashboard /> },
+                    { path: "products", element: <Products /> },
+                    { path: "orders", element: <Orders /> },
+                ],
+            },
         ],
     },
     {
