@@ -17,7 +17,7 @@ class OrderController extends Controller
 
     public function getAllOrder()
     {
-        $orders = Order::with(['items.product', 'user','histories'])->get();
+        $orders = Order::with(['items.product', 'user', 'histories'])->get();
         return response()->json($orders);
     }
     // public function getDetailOrder()
@@ -124,20 +124,28 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Order deleted successfully!']);
     }
-    public function getOrdersByUser($userId)
+    public function getOrdersByUser(Request $request, $userId)
     {
-        $orders = Order::where('user_id', $userId)
+        $query = Order::where('user_id', $userId)
             ->with(['items.product.images' => function ($query) {
                 $query->select('id', 'product_id', 'image_url');
-            }])
-            ->get()
-            ->map(function ($order) {
-                $order->items->transform(function ($item) {
-                    $item->product->image_url = $item->product->images->first()->image_url ?? null;
-                    return $item;
-                });
-                return $order;
+            }]);
+
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('id', $request->search);
+        }
+
+        $orders = $query->get()->map(function ($order) {
+            $order->items->transform(function ($item) {
+                $item->product->image_url = $item->product->images->first()->image_url ?? null;
+                return $item;
             });
+            return $order;
+        });
 
         return response()->json($orders);
     }

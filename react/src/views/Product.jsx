@@ -102,7 +102,6 @@ const Product = () => {
                         )}
                     </Row>
 
-                    {/* Pagination */}
                     <div className="d-flex justify-content-center mt-4">
                         <Button
                             variant="secondary"

@@ -26,7 +26,6 @@ const Header = () => {
                     <Nav.Link as={Link} to="/product">
                         Products
                     </Nav.Link>
-                    <Nav.Link href="#">Contact</Nav.Link>
 
                     {user?.is_admin ===1 && (
                         <Nav.Link as={Link} to="/admin/dashboard">

@@ -14,6 +14,7 @@ import MainLayout from "../components/layout/MainLayout";
 import Checkout from "../views/Checkout";
 import Order from "../views/Order";
 import AdminRoute from "../components/AdminRoute";
+import Profile from "../views/Profile";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 import PaymentStatus from "../components/PaymentStatus";
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
                     { path: "/checkout", element: <Checkout /> },
                     { path: "/order", element: <Order /> },
                     { path: "/payment-status", element: <PaymentStatus /> },
+                    {path: "/profile", element: <Profile /> },
                 ],
             },
         ],

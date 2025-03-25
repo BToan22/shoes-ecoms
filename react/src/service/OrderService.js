@@ -29,9 +29,14 @@ export default class OrderService {
             });
     }
 
-    getOrdersByUser(userId) {
+    getOrdersByUser(userId, status = "", searchTerm = "") {
         return axiosClient
-            .get(`${API_URL}/orders/by-user/${userId}`)
+            .get(`${API_URL}/orders/by-user/${userId}`, {
+                params: {
+                    status: status || undefined,
+                    search: searchTerm || undefined,
+                },
+            })
             .then((res) => res.data)
             .catch((err) => {
                 console.error("Error fetching orders by user:", err);

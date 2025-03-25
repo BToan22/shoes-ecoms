@@ -44,9 +44,15 @@ class AuthController extends Controller
         return response()->json(['token' => $token]);
     }
 
-    public function userProfile()
+    public function userProfile($id)
     {
-        return response()->json(Auth::guard('api')->user());
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json($user);
     }
 
     public function logout(Request $request)

@@ -38,12 +38,21 @@ export default class AuthService {
             });
     }
 
-    async logout() {
+    logout() {
         try {
-            await axiosClient.post("/logout");
+            axiosClient.post("/logout");
             localStorage.removeItem("token");
         } catch (err) {
             console.error("Logout Error:", err);
         }
+    }
+    getUserProfile(userId) {
+        return axiosClient
+            .get(`/profile/${userId}`)
+            .then((res) => res.data)
+            .catch((err) => {
+                console.error("Error fetching profile:", err);
+                throw err;
+            });
     }
 }

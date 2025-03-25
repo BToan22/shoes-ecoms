@@ -28,6 +28,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile/{id}', [AuthController::class, 'userProfile']);
+
 
     //order
     Route::post('/orders/add', [OrderController::class, 'add']);
@@ -47,5 +49,4 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     //order
     Route::get('/getAllOrder', [OrderController::class, 'getAllOrder']);
-
 });
