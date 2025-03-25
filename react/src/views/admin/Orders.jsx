@@ -8,13 +8,14 @@ const orderService = new OrderService();
 const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectedOrderId, setSelectedOrderId] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     const fetchOrders = () => {
         orderService
             .getListAllOrder()
             .then((res) => {
                 setOrders(res);
+                console.log(res);
             })
             .catch((error) => console.error("Error loading orders:", error));
     };
@@ -24,9 +25,11 @@ const Orders = () => {
     }, []);
 
     const handleView = (orderId) => {
-        setSelectedOrderId(orderId);
+        const order = orders.find((o) => o.id === orderId);
+        setSelectedOrder(order);
         setShowModal(true);
     };
+
 
     const handleDelete = async (orderId) => {
         if (window.confirm("Are you sure you want to delete this order?")) {
@@ -48,10 +51,7 @@ const Orders = () => {
                     <Modal.Title>Order Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <OrderDetail
-                        orderId={selectedOrderId}
-                        onClose={() => setShowModal(false)}
-                    />
+                    <OrderDetail order={selectedOrder}  onClose={() => setShowModal(false)} />
                 </Modal.Body>
             </Modal>
 
@@ -60,7 +60,7 @@ const Orders = () => {
                     <tr>
                         <th>#</th>
                         <th>Order ID</th>
-                        <th>User ID</th>
+                        <th>User Name</th>
                         <th>Total Price</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -71,8 +71,8 @@ const Orders = () => {
                         <tr key={order.id}>
                             <td>{index + 1}</td>
                             <td>{order.id}</td>
-                            <td>{order.user_id}</td>
-                            <td>{order.total_price} VNĐ</td>
+                            <td>{order.user.name}</td>
+                            <td>${order.total_amount}</td>
                             <td>{order.status}</td>
                             <td>
                                 <Button
@@ -83,13 +83,13 @@ const Orders = () => {
                                 >
                                     View
                                 </Button>
-                                <Button
+                                {/* <Button
                                     variant="danger"
                                     size="sm"
                                     onClick={() => handleDelete(order.id)}
                                 >
                                     Delete
-                                </Button>
+                                </Button> */}
                             </td>
                         </tr>
                     ))}

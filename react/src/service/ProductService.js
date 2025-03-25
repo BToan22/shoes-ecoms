@@ -4,6 +4,11 @@ export default class ProductService {
     getList(params) {
         return axiosClient.get("/products", { params }).then((res) => res.data);
     }
+    getListWithSearch(params) {
+        return axiosClient
+            .get("/products-search", { params })
+            .then((res) => res.data);
+    }
 
     getDetail(id) {
         return axiosClient.get(`/products/${id}`).then((res) => res.data);
@@ -20,13 +25,25 @@ export default class ProductService {
             .then((res) => res.data);
     }
 
-    update({ id, name, description, price }) {
+    update(id, formData) {
+        for (let pair of formData.entries()) {
+            console.log(pair[0], pair[1]);
+        }
+
         return axiosClient
-            .put(`/products/${id}`, { name, description, price })
-            .then((res) => res.data);
+            .post(`/products/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+            .then((res) => res.data)
+            .catch((error) => {
+                console.error("Update error:", error);
+                throw error;
+            });
     }
 
-    delete(id) {
-        return axiosClient.delete(`/products/${id}`).then((res) => res.data);
+    delete(productId) {
+        return axiosClient
+            .delete(`/products/${productId}`)
+            .then((res) => res.data);
     }
 }

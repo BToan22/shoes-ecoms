@@ -12,10 +12,36 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ProductController extends Controller
 {
-    public function index()
-    {
+    public function getList(Request $request){
         $products = Product::with('images')->get();
-        Log::info($products);
+        return response()->json($products);
+    }
+    public function getListWithSearch(Request $request)
+    {
+
+        $query = Product::with('images');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->has('brands')) {
+            $brands = is_array($request->brands) ? $request->brands : explode(',', $request->brands);
+            if (!empty($brands)) {
+                $query->whereIn('brand', $brands);
+            }
+        }
+
+        if ($request->filled('minPrice') && is_numeric($request->minPrice)) {
+            $query->where('price', '>=', $request->minPrice);
+        }
+
+        if ($request->filled('maxPrice') && is_numeric($request->maxPrice)) {
+            $query->where('price', '<=', $request->maxPrice);
+        }
+
+        $products = $query->paginate($request->get('per_page', 6));
+
         return response()->json($products);
     }
 
@@ -33,7 +59,6 @@ class ProductController extends Controller
     }
     public function add(Request $request)
     {
-        Log::info('Bắt đầu lưu sản phẩm', ['request_data' => $request->all()]);
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'brand' => 'required|string|max:255',
@@ -42,7 +67,6 @@ class ProductController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Log::info('Dữ liệu hợp lệ:', $validatedData);
 
         $product = Product::create($validatedData);
         Log::info('Sản phẩm đã lưu:', ['product' => $product]);
@@ -50,13 +74,13 @@ class ProductController extends Controller
         if ($request->hasFile('images')) {
 
             foreach ($request->file('images') as $image) {
-                Log::info('🖼 Ảnh nhận được:', [
-                    'name' => $image->getClientOriginalName(),
-                    'size' => $image->getSize(),
-                    'mime_type' => $image->getMimeType()
-                ]);
+                // Log::info('🖼 Ảnh nhận được:', [
+                //     'name' => $image->getClientOriginalName(),
+                //     'size' => $image->getSize(),
+                //     'mime_type' => $image->getMimeType()
+                // ]);
                 $path = $image->store('public/products');
-                Log::info('Ảnh đã lưu:', ['path' => $path]);
+                // Log::info('Ảnh đã lưu:', ['path' => $path]);
 
                 ProductImage::create([
                     'product_id' => $product->id,
@@ -64,10 +88,8 @@ class ProductController extends Controller
                 ]);
             }
         } else {
-            Log::warning('Không có ảnh nào được tải lên.');
-        }
-
-        Log::info('Sản phẩm đã thêm thành công!', ['product' => $product->load('images')]);
+            Log::warning('No image uploaded.');
+        };
 
         return response()->json([
             'message' => 'Sản phẩm đã được thêm thành công!',
@@ -79,26 +101,74 @@ class ProductController extends Controller
     {
         Log::info('📥 Nhận yêu cầu tải ảnh', ['request_data' => $request->all()]);
 
-        // Kiểm tra đầu vào
         $validatedData = $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Log::info('✅ Ảnh hợp lệ:', ['image_info' => $request->file('image')->getClientOriginalName()]);
 
-        // Lưu ảnh vào thư mục storage/app/public/products
+
         $path = $request->file('image')->store('products', 'public');
 
-        Log::info('📁 Ảnh đã lưu tại:', ['path' => $path]);
 
-        // Chuyển đường dẫn thành URL có thể truy cập
+
+
         $imageUrl = str_replace('public/', 'storage/', $path);
 
-        Log::info('🔗 Đường dẫn ảnh sau khi chỉnh sửa:', ['image_url' => $imageUrl]);
+
 
         return response()->json([
-            'message' => 'Ảnh đã được tải lên thành công!',
+            'message' => 'Upload Imange Complete!',
             'image_url' => url($imageUrl)
         ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'brand' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'sometimes|numeric',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $product->update($validatedData);
+        Log::info('Product updated successfully:', ['product' => $product]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('public/products');
+
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_url' => $path,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Product has been updated successfully!',
+            'product' => $product->load('images'),
+        ], 200);
+    }
+    public function delete($id)
+    {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        ProductImage::where('product_id', $id)->delete();
+
+        $product->delete();
+
+        return response()->json(['message' => 'Product deleted successfully']);
     }
 }

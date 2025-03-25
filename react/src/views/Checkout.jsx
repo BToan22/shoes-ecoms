@@ -72,7 +72,7 @@ const Checkout = () => {
 
                 console.log(paymentResponse);
 
-                if (paymentResponse?.session_id &&paymentResponse?.url ) {
+                if (paymentResponse?.session_id && paymentResponse?.url) {
                     await paymentService.createPaymentRecord(
                         orderResponse.order.id,
                         paymentResponse.session_id,
@@ -83,6 +83,8 @@ const Checkout = () => {
                 } else {
                     setError("Unable to proceed with payment.");
                 }
+            } else if (paymentMethod === "Cash on Delivery") {
+                navigate("/orders");
             }
         } catch (err) {
             setError("Failed to place order. Please try again.");
@@ -155,7 +157,6 @@ const Checkout = () => {
                 >
                     <option value="">Select</option>
                     <option>Credit Card</option>
-                    <option>PayPal</option>
                     <option>Cash on Delivery</option>
                     <option>Momo</option>
                 </Form.Select>

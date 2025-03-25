@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Image } from "react-bootstrap";
 import ProductService from "../../service/ProductService";
 
 const productService = new ProductService();
@@ -10,7 +10,8 @@ const ProductDetail = ({ productId, onProductSaved, onClose }) => {
         description: "",
         price: "",
         brand: "",
-        images: [],
+        images: [], // Lưu danh sách file upload
+        existingImages: [], // Lưu danh sách ảnh cũ
     });
 
     const [isEditing, setIsEditing] = useState(false);
@@ -19,15 +20,16 @@ const ProductDetail = ({ productId, onProductSaved, onClose }) => {
         const fetchProduct = async () => {
             if (productId) {
                 try {
-                    const response = await productService.getById(productId);
-                    if (response.status === 200) {
-                        const product = response.data;
+                    const response = await productService.getDetail(productId);
+                    if (response) {
+                        const product = response;
                         setFormData({
                             name: product.name,
                             description: product.description,
                             price: product.price,
                             brand: product.brand,
-                            images: product.images || [],
+                            images: [],
+                            existingImages: product.images || [],
                         });
                         setIsEditing(true);
                     }
@@ -62,6 +64,9 @@ const ProductDetail = ({ productId, onProductSaved, onClose }) => {
         formData.images.forEach((file) => {
             data.append("images[]", file);
         });
+        for (let pair of data.entries()) {
+            console.log(`${pair[0]}:`, pair[1]);
+        }
 
         try {
             let res;
@@ -71,7 +76,6 @@ const ProductDetail = ({ productId, onProductSaved, onClose }) => {
                 res = await productService.add(data);
             }
 
-            console.log(res);
             onProductSaved();
             onClose();
         } catch (error) {
@@ -81,31 +85,74 @@ const ProductDetail = ({ productId, onProductSaved, onClose }) => {
 
     return (
         <Form onSubmit={handleSubmit} encType="multipart/form-data">
-            <h2>{isEditing ? "Edit Product" : "Add Product"}</h2>
-
             <Form.Group className="mb-3">
                 <Form.Label>Name</Form.Label>
-                <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
+                <Form.Control
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                />
             </Form.Group>
 
             <Form.Group className="mb-3">
                 <Form.Label>Description</Form.Label>
-                <Form.Control type="text" name="description" value={formData.description} onChange={handleChange} required />
+                <Form.Control
+                    type="text"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                />
             </Form.Group>
 
             <Form.Group className="mb-3">
                 <Form.Label>Price</Form.Label>
-                <Form.Control type="number" name="price" value={formData.price} onChange={handleChange} required />
+                <Form.Control
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                />
             </Form.Group>
 
             <Form.Group className="mb-3">
                 <Form.Label>Brand</Form.Label>
-                <Form.Control type="text" name="brand" value={formData.brand} onChange={handleChange} required />
+                <Form.Control
+                    type="text"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleChange}
+                    required
+                />
             </Form.Group>
 
             <Form.Group className="mb-3">
                 <Form.Label>Images</Form.Label>
-                <Form.Control type="file" multiple onChange={handleFileChange} />
+                <Form.Control
+                    type="file"
+                    multiple
+                    onChange={handleFileChange}
+                />
+                {isEditing && formData.existingImages.length > 0 && (
+                    <div className="mt-2">
+                        <p>Current Images:</p>
+                        {formData.existingImages.map((img, index) => (
+                            <Image
+                                key={index}
+                                src={img.image_url}
+                                alt={`Product ${index}`}
+                                thumbnail
+                                style={{
+                                    maxWidth: "100px",
+                                    marginRight: "10px",
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
             </Form.Group>
 
             <Button variant="primary" type="submit">

@@ -74,7 +74,7 @@ const Order = () => {
                     type="text"
                     placeholder="🔍 Search orders..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value.trim())}
                 />
             </Form>
 
@@ -124,7 +124,7 @@ const Order = () => {
                                         {item.quantity}
                                     </p>
                                     <h5 className="fw-bold">
-                                        <strong>Price:</strong> ${item.price}
+                                        <strong>Price:</strong> ${parseInt(item.price)}
                                     </h5>
                                 </Col>
                             </Row>

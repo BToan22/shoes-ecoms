@@ -29,7 +29,7 @@ const Header = () => {
                     <Nav.Link href="#">Contact</Nav.Link>
 
                     {user?.is_admin ===1 && (
-                        <Nav.Link as={Link} to="/admin">
+                        <Nav.Link as={Link} to="/admin/dashboard">
                             Manage
                         </Nav.Link>
                     )}

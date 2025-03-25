@@ -1,10 +1,10 @@
 import axios from "axios";
-
+import axiosClient from "../../axiosClient";
 const API_URL = "http://127.0.0.1:8000/api";
 
 export default class OrderService {
     getListAllOrder(params) {
-        return axios
+        return axiosClient
             .get(`${API_URL}/getAllOrder`, { params })
             .then((res) => res.data);
     }
@@ -20,7 +20,7 @@ export default class OrderService {
     }
 
     addOrder(orderData) {
-        return axios
+        return axiosClient
             .post(`${API_URL}/orders/add`, orderData)
             .then((res) => res.data)
             .catch((err) => {
@@ -30,7 +30,7 @@ export default class OrderService {
     }
 
     getOrdersByUser(userId) {
-        return axios
+        return axiosClient
             .get(`${API_URL}/orders/by-user/${userId}`)
             .then((res) => res.data)
             .catch((err) => {
@@ -49,7 +49,7 @@ export default class OrderService {
     }
     updateOrderStatus(orderId, status) {
         console.log(orderId, status);
-        return axios
+        return axiosClient
             .put(`${API_URL}/orders/${orderId}/status`, { status })
             .then((res) => res.data)
             .catch((err) => {

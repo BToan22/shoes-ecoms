@@ -10,38 +10,21 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use App\Models\OrderHistory;
 
 class OrderController extends Controller
 {
 
-    public function getOrdersByUid(Request $request)
-    {
-
-        $request->validate([
-            'uid' => 'required|string|exists:users,uid',
-        ]);
-
-
-        $user = User::where('uid', $request->uid)->first();
-
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-        if (Auth::user()->is_admin !== 1 && Auth::id() !== $user->id) {
-            return response()->json(['error' => 'Unauthorized access'], 403);
-        }
-
-
-        $orders = Order::where('user_id', $user->id)->with('items.product')->get();
-
-        return response()->json($orders);
-    }
     public function getAllOrder()
     {
-        $orders = Order::with('items.product')->get();
+        $orders = Order::with(['items.product', 'user','histories'])->get();
         return response()->json($orders);
     }
+    // public function getDetailOrder()
+    // {
+    //     $orders = Order::with(['items.product', 'user','histories'])->get();
+    //     return response()->json($orders);
+    // }
 
 
 
@@ -84,7 +67,11 @@ class OrderController extends Controller
 
             DB::commit();
             Log::info('Order successfully committed:', ['order_id' => $order->id]);
-
+            OrderHistory::create([
+                'order_id' => $order->id,
+                'status' => 'to Pay',
+                'changed_at' => now()
+            ]);
             return response()->json(['message' => 'Order created successfully!', 'order' => $order], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -162,30 +149,67 @@ class OrderController extends Controller
             return response()->json(['error' => 'Order not found'], 404);
         }
 
-        if ($order->status !== 'pending') {
+        if ($order->status !== 'to Pay') {
             return response()->json(['error' => 'Only pending orders can be canceled'], 400);
         }
 
-        $order->update(['status' => 'cancelled']);
+        $order->update(['status' => 'Canceled']);
 
         return response()->json(['message' => 'Order has been canceled']);
     }
-    public function updateStatus(Request $request, $orderId)
+    // public function updateStatus(Request $request, $orderId)
+    // {
+    //     Log::info($request->all());
+    //     $order = Order::find($orderId);
+
+    //     if (!$order) {
+    //         return response()->json(['message' => 'Order not found'], 404);
+    //     }
+
+    //     $validated = $request->validate([
+    //         'status' => 'required|string|in:to Ship,to Receive,Completed,Canceled,to Pay'
+    //     ]);
+
+    //     $order->status = $validated['status'];
+    //     $order->save();
+
+    //     return response()->json(['message' => 'Order status updated successfully', 'order' => $order], 200);
+    // }
+    public function updateOrderStatus(Request $request, $id)
     {
-        Log::info($request->all());
-        $order = Order::find($orderId);
+        $order = Order::find($id);
 
         if (!$order) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'status' => 'required|string|in:to Ship,to Receive,Completed,Canceled,to Pay'
         ]);
 
-        $order->status = $validated['status'];
+
+        $order->status = $request->status;
         $order->save();
 
-        return response()->json(['message' => 'Order status updated successfully', 'order' => $order], 200);
+        OrderHistory::create([
+            'order_id' => $order->id,
+            'status' => $request->status,
+            'changed_at' => now()
+        ]);
+
+        return response()->json([
+            'message' => 'Order status updated successfully!',
+            'order' => $order->load('histories')
+        ]);
     }
+    // public function getOrderHistory($id)
+    // {
+    //     $order = Order::with('histories')->find($id);
+
+    //     if (!$order) {
+    //         return response()->json(['message' => 'Order not found'], 404);
+    //     }
+
+    //     return response()->json($order->histories);
+    // }
 }

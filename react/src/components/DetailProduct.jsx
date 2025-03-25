@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-// import Navbar from "../components/Navbar";
 import Footer from "./Footer";
 import ProductService from "../service/ProductService";
 import OrderService from "../service/OrderService";
+import ServiceService from "../service/ServiceService";
 
 const productService = new ProductService();
-const orderService= new OrderService();
-
+const orderService = new OrderService();
+const serviceService = new ServiceService();
 const DetailProduct = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -19,8 +19,14 @@ const DetailProduct = () => {
     useEffect(() => {
         productService
             .getDetail(id)
-            .then((res) => setProduct(res))
+            .then((res) => {
+                setProduct({
+                    ...res,
+                    price: parseFloat(res.price),
+                });
+            })
             .catch((error) => console.error("Error fetching product:", error));
+        console.log(product);
     }, [id]);
 
     const handleBuyNow = () => {

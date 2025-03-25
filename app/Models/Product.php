@@ -9,6 +9,9 @@ class Product extends Model
     //
     protected $fillable = ['name', 'brand', 'description', 'price'];
 
+    protected $casts = [
+        'price' => 'integer',
+    ];
 
     public function images()
     {

@@ -32,6 +32,19 @@ const Products = () => {
         setSelectedProductId(productId);
         setShowModal(true);
     };
+    const handleDelete = (productId) => {
+        if (!window.confirm("Are you sure you want to delete this product?")) {
+            return;
+        }
+
+        productService
+            .delete(productId)
+            .then(() => {
+                alert("Product deleted successfully!");
+                fetchProducts(); // Refresh product list after delete
+            })
+            .catch((error) => console.error("Error deleting product:", error));
+    };
 
     return (
         <Container>
@@ -63,7 +76,6 @@ const Products = () => {
                         <th>Image</th>
                         <th>Name</th>
                         <th>Price</th>
-                        <th>Description</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -83,8 +95,7 @@ const Products = () => {
                                 />
                             </td>
                             <td>{product.name}</td>
-                            <td>{product.price} VNĐ</td>
-                            <td>{product.description}</td>
+                            <td>${product.price}</td>
                             <td>
                                 <Button
                                     variant="warning"
@@ -94,7 +105,7 @@ const Products = () => {
                                 >
                                     Edit
                                 </Button>
-                                <Button variant="danger" size="sm">
+                                <Button variant="danger" size="sm" onClick={() => handleDelete(product.id)}>
                                     Delete
                                 </Button>
                             </td>
