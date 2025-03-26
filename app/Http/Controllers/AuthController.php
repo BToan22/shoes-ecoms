@@ -7,6 +7,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Cookie;
+
+
+
 
 class AuthController extends Controller
 {
@@ -40,8 +44,8 @@ class AuthController extends Controller
         if (!$token = Auth::guard('api')->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        return response()->json(['token' => $token]);
+        $cookie = cookie('jwt', $token, 60, '/', null, true, true, false, 'None');
+        return response()->json(['message' => 'Login success'])->withCookie($cookie);
     }
 
     public function userProfile($id)
@@ -57,16 +61,33 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
+        $token = $request->cookie('jwt');
 
-            return response()->json([
-                'message' => 'Successfully logged out. Token has been blacklisted.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Failed to logout. Token might be invalid or expired.'
-            ]);
+        if (!$token) {
+            return response()->json(['message' => 'Token not found'], 401);
         }
+
+        try {
+            JWTAuth::invalidate($token);
+            return response()->json(['message' => 'Logged out'])
+                ->withCookie(cookie('jwt', '', -1, '/', request()->getHost(), true, true, false, 'None'));
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to logout.'], 500);
+        }
+    }
+    public function me(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'created_at' => $user->created_at,
+            'is_admin' => $user->is_admin,
+        ]);
     }
 }

@@ -16,6 +16,7 @@ import Order from "../views/Order";
 import AdminRoute from "../components/AdminRoute";
 import Profile from "../views/Profile";
 import ProtectedRoute from "../components/ProtectedRoute";
+import RedirectRoute from "../components/RedirectRoute";
 
 import PaymentStatus from "../components/PaymentStatus";
 
@@ -40,7 +41,7 @@ const router = createBrowserRouter([
                     { path: "/checkout", element: <Checkout /> },
                     { path: "/order", element: <Order /> },
                     { path: "/payment-status", element: <PaymentStatus /> },
-                    {path: "/profile", element: <Profile /> },
+                    { path: "/profile", element: <Profile /> },
                 ],
             },
         ],
@@ -62,12 +63,12 @@ const router = createBrowserRouter([
         ],
     },
     {
-        path: "/login",
-        element: <Login />,
-    },
-    {
-        path: "/signup",
-        element: <Signup />,
+        path: "/",
+        element: <RedirectRoute />,
+        children: [
+            { path: "/login", element: <Login /> },
+            { path: "/signup", element: <Signup /> },
+        ],
     },
 ]);
 

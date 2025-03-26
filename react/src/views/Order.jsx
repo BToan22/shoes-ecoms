@@ -153,7 +153,7 @@ const Order = () => {
                                     </p>
                                     <h5 className="fw-bold">
                                         <strong>Price:</strong> $
-                                        {parseInt(item.price)}
+                                        {parseInt(item.price)*item.quantity}
                                     </h5>
                                 </Col>
                             </Row>

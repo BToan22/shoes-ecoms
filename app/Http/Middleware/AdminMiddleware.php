@@ -6,25 +6,23 @@ use Closure;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Illuminate\Support\Facades\Log;
-
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-
+use Illuminate\Support\Facades\Log;
 
 class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        Log::info('$request:', ['$request' => $request]);
-
         try {
-            if (!$token = JWTAuth::getToken()) {
+            $token = $request->bearerToken() ?? $request->cookie('jwt');
+
+            if (!$token) {
                 return response()->json(['message' => 'Token not provided'], 401);
             }
 
-            $user = JWTAuth::parseToken()->authenticate();
-            Log::info('Người dùng đăng nhập:', ['user' => $user]);
+            JWTAuth::setToken($token);
+            $user = JWTAuth::authenticate();
 
             if (!$user || !$user->is_admin) {
                 return response()->json(['error' => 'Unauthorized. Admin access required.'], 403);

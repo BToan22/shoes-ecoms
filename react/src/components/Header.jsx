@@ -9,6 +9,7 @@ const Header = () => {
     const { user, isLoggedIn, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     console.log(user);
+    console.log(isLoggedIn);
     const handleCartClick = () => {
         navigate("/order");
     };

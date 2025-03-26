@@ -15,9 +15,8 @@ const Login = () => {
         event.preventDefault();
         authService
             .login(email, password)
-            .then((token) => {
-                login(token);
-                console.log(token);
+            .then(() => {
+                login();
                 navigate("/");
             })
             .catch(() => {

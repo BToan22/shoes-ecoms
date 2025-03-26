@@ -29,9 +29,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile/{id}', [AuthController::class, 'userProfile']);
+    Route::get('/me', [AuthController::class, 'me']);
 
-
-    //order
+    // Order routes
     Route::post('/orders/add', [OrderController::class, 'add']);
     Route::get('/orders/by-user/{userId}', [OrderController::class, 'getOrdersByUser']);
     Route::post('/orders/{orderId}/cancel', [OrderController::class, 'cancelOrder']);
@@ -39,14 +39,12 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    //product
     Route::post('/products/add', [ProductController::class, 'add']);
     Route::post('/upload-image', [ProductController::class, 'uploadImage']);
     Route::post('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'delete']);
     Route::get('/dashboard/stats', [DashboardController::class, 'getDashboardStats']);
 
-
-    //order
+    // Order management
     Route::get('/getAllOrder', [OrderController::class, 'getAllOrder']);
 });

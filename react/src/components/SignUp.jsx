@@ -50,8 +50,9 @@ const Signup = ({ setIsLoggedIn, getProfile }) => {
 
     return (
         <Container
+            fluid
             className="d-flex justify-content-center align-items-center vh-100"
-            style={{ backgroundColor: "#121212" }}
+            style={{ backgroundColor: "black" }}
         >
             <Card
                 className="p-4"

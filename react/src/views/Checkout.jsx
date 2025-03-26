@@ -84,7 +84,7 @@ const Checkout = () => {
                     setError("Unable to proceed with payment.");
                 }
             } else if (paymentMethod === "Cash on Delivery") {
-                navigate("/orders");
+                navigate("/order");
             }
         } catch (err) {
             setError("Failed to place order. Please try again.");
