@@ -15,7 +15,14 @@ class Authenticate extends Middleware
     protected function authenticate($request, array $guards)
     {
         try {
-            $user = JWTAuth::parseToken()->authenticate();
+            $token = $request->cookie('jwt');
+
+            if (!$token) {
+                Log::error(' No token found in cookie');
+                $this->unauthenticated($request, $guards);
+            }
+
+            $user = JWTAuth::setToken($token)->authenticate();
 
             if (!$user) {
                 $this->unauthenticated($request, $guards);
@@ -25,7 +32,7 @@ class Authenticate extends Middleware
 
             return $user;
         } catch (JWTException $e) {
-            Log::error('❌ JWT Authentication Failed:', ['error' => $e->getMessage()]);
+            Log::error('JWT Authentication Failed:', ['error' => $e->getMessage()]);
             $this->unauthenticated($request, $guards);
         }
     }

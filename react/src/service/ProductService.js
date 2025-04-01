@@ -4,6 +4,12 @@ export default class ProductService {
     getList(params) {
         return axiosClient.get("/products", { params }).then((res) => res.data);
     }
+
+    getLatest(params) {
+        return axiosClient
+            .get("/products/latest", { params })
+            .then((res) => res.data);
+    }
     getListWithSearch(params) {
         return axiosClient
             .get("/products-search", { params })
@@ -44,6 +50,16 @@ export default class ProductService {
     delete(productId) {
         return axiosClient
             .delete(`/products/${productId}`)
+            .then((res) => res.data);
+    }
+    addProductView(productId) {
+        return axiosClient
+            .post(`/product/view/${productId}`)
+            .then((res) => res.data);
+    }
+    recommended(){
+        return axiosClient
+            .get(`/user/recommended-shoes`)
             .then((res) => res.data);
     }
 }

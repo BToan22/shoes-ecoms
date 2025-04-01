@@ -24,6 +24,12 @@ const DetailProduct = () => {
                 });
             })
             .catch((error) => console.error("Error fetching product:", error));
+        productService
+            .addProductView(id)
+            .then(() => console.log("Product view recorded"))
+            .catch((error) =>
+                console.error("Error recording product view:", error)
+            );
     }, [id]);
 
     const handleQuantityChange = (newQuantity) => {

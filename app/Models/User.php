@@ -50,4 +50,8 @@ class User extends Authenticatable implements JWTSubject
             'is_admin' => $this->is_admin,
         ];
     }
+    public function favoriteCategories()
+    {
+        return $this->belongsToMany(Category::class, 'user_favorite_categories', 'user_id', 'category_id');
+    }
 }

@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import ProductService from "../service/ProductService";
 
 const productService = new ProductService();
 
 const SneakerDisplay = () => {
     const [products, setProducts] = useState([]);
+    const navigate = useNavigate();
 
     const fetchProducts = () => {
         productService
-            .getList()
+            .recommended()
             .then((res) => {
                 console.log(res);
                 setProducts(res);
@@ -23,11 +25,14 @@ const SneakerDisplay = () => {
 
     return (
         <Container className="py-5">
-            <h2 className="text-center">Sneaker Display</h2>
+            <h2 className="text-center">Recommendations Sneaker</h2>
             <Row className="mt-4">
                 {products.map((sneaker, index) => (
                     <Col md={4} key={index}>
-                        <Card className="text-center p-3 shadow-sm">
+                        <Card
+                            className="text-center p-3 shadow-sm"
+                            onClick={() => navigate(`/product/${sneaker.id}`)}
+                        >
                             <Card.Img
                                 variant="top"
                                 src={

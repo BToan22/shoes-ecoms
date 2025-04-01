@@ -9,7 +9,7 @@ const NewSneaker = () => {
 
     const fetchProducts = () => {
         productService
-            .getList()
+            .getLatest()
             .then((res) => {
                 setProducts(res);
             })

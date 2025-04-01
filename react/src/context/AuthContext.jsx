@@ -38,11 +38,17 @@ const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        authService.logout().then(() => {
-            setUser(null);
-            setIsLoggedIn(false);
-            Cookies.remove("jwt");
-        });
+        authService
+            .logout()
+            .then(() => {
+                setUser(null);
+                setIsLoggedIn(false);
+                Cookies.remove("jwt");
+                window.location.reload();
+            })
+            .catch((error) => {
+                console.error("Logout failed", error);
+            });
     };
 
     return (

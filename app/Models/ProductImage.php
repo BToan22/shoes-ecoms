@@ -18,6 +18,9 @@ class ProductImage extends Model
     }
     public function getImageUrlAttribute($value)
     {
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
         return Storage::url($value);
     }
 }

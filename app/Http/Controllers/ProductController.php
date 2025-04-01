@@ -7,15 +7,107 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ProductImage;
+use Illuminate\Support\Carbon;
+use App\Models\UserFavoriteCategory;
+use App\Models\ProductView;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    public function getList(Request $request){
+    public function getList(Request $request)
+    {
         $products = Product::with('images')->get();
         return response()->json($products);
     }
+    public function getLatestProducts()
+    {
+        $products = Product::with('images')->latest('created_at')->take(6)->get();
+        return response()->json($products);
+    }
+    public function storeProductView($productId)
+    {
+        $token = request()->cookie('jwt');
+        if (!$token) {
+            Log::error('No token found in cookie');
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+
+        $user = JWTAuth::setToken($token)->authenticate();
+
+        Log::info("Storing product view", [
+            'user_id' => $user->id,
+            'product_id' => $productId
+        ]);
+
+        try {
+            ProductView::create([
+                'user_id' => $user->id,
+                'product_id' => $productId,
+                'viewed_at' => now(),
+            ]);
+
+            Log::info("Product view stored successfully", [
+                'user_id' => $user->id,
+                'product_id' => $productId
+            ]);
+
+            return response()->json(['message' => 'View stored successfully']);
+        } catch (\Exception $e) {
+            Log::error("Error storing product view", [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'product_id' => $productId
+            ]);
+
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+    public function recommendShoes()
+    {
+        $token = request()->cookie('jwt');
+        if (!$token) {
+            Log::error('No token found in cookie');
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $user = JWTAuth::setToken($token)->authenticate();
+
+        $favoriteCategories = UserFavoriteCategory::where('user_id', $user->id)
+            ->pluck('category_id')
+            ->toArray();
+
+
+        $viewedProducts = ProductView::where('user_id', $user->id)
+            ->orderBy('viewed_at', 'desc')
+            ->take(5)
+            ->pluck('product_id')
+            ->toArray();
+
+        $viewedCategories = Product::whereIn('id', $viewedProducts)
+            ->pluck('category_id')
+            ->toArray();
+
+        $recommendedCategories = array_unique(array_merge($favoriteCategories, $viewedCategories));
+
+        $recommendedShoes = collect();
+
+        foreach ($recommendedCategories as $categoryId) {
+            $products = Product::with('images')
+                ->where('category_id', $categoryId)
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+
+            $recommendedShoes = $recommendedShoes->merge($products);
+        }
+
+        return response()->json($recommendedShoes);
+    }
+
+
     public function getListWithSearch(Request $request)
     {
 
