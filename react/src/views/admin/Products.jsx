@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Container, Modal } from "react-bootstrap";
+import { Table, Button, Container, Modal, Pagination } from "react-bootstrap";
 import ProductService from "../../service/ProductService";
 import ProductDetail from "../../components/admin/ProductDetail";
 
@@ -9,19 +9,27 @@ const Products = () => {
     const [products, setProducts] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+    const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+    const [perPage, setPerPage] = useState(10); // Số sản phẩm trên mỗi trang
 
-    const fetchProducts = () => {
+    const fetchProducts = (page = currentPage) => {
         productService
-            .getList()
+            .getList({ page, per_page: perPage }) // Truyền số trang và số sản phẩm mỗi trang
             .then((res) => {
-                setProducts(res);
+                setProducts(res.data); // Dữ liệu sản phẩm
+                setTotalPages(res.last_page); // Tổng số trang
             })
             .catch((error) => console.error("Error loading products:", error));
     };
 
     useEffect(() => {
         fetchProducts();
-    }, []);
+    }, [currentPage, perPage]); // Cập nhật khi trang hoặc số sản phẩm mỗi trang thay đổi
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     const handleAdd = () => {
         setSelectedProductId(null);
@@ -32,6 +40,7 @@ const Products = () => {
         setSelectedProductId(productId);
         setShowModal(true);
     };
+
     const handleDelete = (productId) => {
         if (!window.confirm("Are you sure you want to delete this product?")) {
             return;
@@ -82,7 +91,7 @@ const Products = () => {
                 <tbody>
                     {products.map((product, index) => (
                         <tr key={product.id}>
-                            <td>{index + 1}</td>
+                            <td>{(currentPage - 1) * perPage + index + 1}</td>
                             <td>
                                 <img
                                     src={product.images[0]?.image_url}
@@ -105,7 +114,11 @@ const Products = () => {
                                 >
                                     Edit
                                 </Button>
-                                <Button variant="danger" size="sm" onClick={() => handleDelete(product.id)}>
+                                <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleDelete(product.id)}
+                                >
                                     Delete
                                 </Button>
                             </td>
@@ -113,6 +126,27 @@ const Products = () => {
                     ))}
                 </tbody>
             </Table>
+
+            {/* Phân trang */}
+            <Pagination>
+                <Pagination.Prev
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                />
+                {[...Array(totalPages)].map((_, index) => (
+                    <Pagination.Item
+                        key={index + 1}
+                        active={index + 1 === currentPage}
+                        onClick={() => handlePageChange(index + 1)}
+                    >
+                        {index + 1}
+                    </Pagination.Item>
+                ))}
+                <Pagination.Next
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                />
+            </Pagination>
         </Container>
     );
 };

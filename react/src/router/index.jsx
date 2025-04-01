@@ -19,6 +19,8 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import RedirectRoute from "../components/RedirectRoute";
 
 import PaymentStatus from "../components/PaymentStatus";
+import Users from "../views/admin/Users";
+import UserDetail from "../views/admin/UserDetail";
 
 const router = createBrowserRouter([
     {
@@ -58,6 +60,8 @@ const router = createBrowserRouter([
                     { path: "dashboard", element: <Dashboard /> },
                     { path: "products", element: <Products /> },
                     { path: "orders", element: <Orders /> },
+                    { path: "users", element: <Users /> },
+                    { path: "users/:userId", element: <UserDetail /> },
                 ],
             },
         ],

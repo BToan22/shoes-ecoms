@@ -8,6 +8,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserController;
 
 //product
 Route::get('/products', [ProductController::class, 'getList']);
@@ -49,7 +50,6 @@ Route::middleware('auth')->group(function () {
 
     //recommen
     Route::get('/user/recommended-shoes', [ProductController::class, 'recommendShoes']);
-
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -68,4 +68,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{id}', [CategoryController::class, 'update']);
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+    //user
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
 });

@@ -26,6 +26,8 @@ const Checkout = () => {
         console.log(user);
         if (!user) {
             navigate("/login");
+        } else if (user.is_admin === 1) {
+            navigate("/");
         } else {
             setFullName(user.name || "");
             setAddress(user.address || "");

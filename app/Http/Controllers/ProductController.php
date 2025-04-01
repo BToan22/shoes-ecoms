@@ -18,9 +18,14 @@ class ProductController extends Controller
 {
     public function getList(Request $request)
     {
-        $products = Product::with('images')->get();
+        $perPage = $request->get('per_page', 10);
+
+
+        $products = Product::with('images')->paginate($perPage);
+
         return response()->json($products);
     }
+
     public function getLatestProducts()
     {
         $products = Product::with('images')->latest('created_at')->take(6)->get();

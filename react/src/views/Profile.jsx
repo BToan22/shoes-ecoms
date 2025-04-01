@@ -19,8 +19,8 @@ const Profile = () => {
     const { user } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const [categories, setCategories] = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]); // Danh sách đã lưu
-    const [tempSelectedCategories, setTempSelectedCategories] = useState([]); // Danh sách tạm thời
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [tempSelectedCategories, setTempSelectedCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -51,7 +51,7 @@ const Profile = () => {
             .then((data) => {
                 const initialSelected = data.map((category) => category.id);
                 setSelectedCategories(initialSelected);
-                setTempSelectedCategories(initialSelected); // Cập nhật vào danh sách tạm
+                setTempSelectedCategories(initialSelected);
             })
             .catch((error) => {
                 console.error("Error fetching favorite categories:", error);
@@ -63,7 +63,7 @@ const Profile = () => {
 
     const handleCategoryChange = (e) => {
         const { value, checked } = e.target;
-        const categoryId = parseInt(value, 10); // Chuyển value thành số nếu nó là chuỗi
+        const categoryId = parseInt(value, 10);
 
         setTempSelectedCategories((prevSelected) => {
             let newSelected;
@@ -73,17 +73,16 @@ const Profile = () => {
                 newSelected = prevSelected.filter((id) => id !== categoryId);
             }
 
-            // Log để kiểm tra trạng thái danh sách tạm thời
             console.log("Temporary selected categories:", newSelected);
             return newSelected;
         });
     };
 
     const handleSaveCategories = () => {
-        setSelectedCategories(tempSelectedCategories); // Cập nhật vào danh sách chính
+        setSelectedCategories(tempSelectedCategories);
 
         categoryService
-            .saveFavoriteCategories(tempSelectedCategories) // Lưu vào database
+            .saveFavoriteCategories(tempSelectedCategories)
             .then(() => {
                 alert("Favorite categories saved successfully");
             })
