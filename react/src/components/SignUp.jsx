@@ -12,11 +12,21 @@ const Signup = ({ setIsLoggedIn, getProfile }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
     const authService = new AuthService();
-
+    const validatePassword = (password) => {
+        const regex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        return regex.test(password);
+    };
     const handleSignup = async (e) => {
         e.preventDefault();
         setErrorMessage("");
+        if (!validatePassword(password)) {
+            alert(
+                "Password must be at least 6 characters, include uppercase, lowercase, number, and special character."
+            );
 
+            return;
+        }
         try {
             const registerResponse = await authService.register({
                 name,
@@ -25,24 +35,7 @@ const Signup = ({ setIsLoggedIn, getProfile }) => {
                 phone,
                 address,
             });
-
-            if (registerResponse.token) {
-                const loginResponse = await authService.login({
-                    email,
-                    password,
-                });
-
-                if (loginResponse.token) {
-                    localStorage.setItem("token", loginResponse.token);
-                    setIsLoggedIn(true);
-                    getProfile();
-                    navigate("/");
-                } else {
-                    setErrorMessage("Login failed after signup.");
-                }
-            } else {
-                setErrorMessage("Signup failed. Please try again.");
-            }
+            navigate("/login");
         } catch (error) {
             setErrorMessage(error.message || "An error occurred.");
         }

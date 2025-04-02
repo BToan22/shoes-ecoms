@@ -160,7 +160,7 @@ const Checkout = () => {
                     <option value="">Select</option>
                     <option>Credit Card</option>
                     <option>Cash on Delivery</option>
-                    <option>Momo</option>
+                    {/* <option>Momo</option> */}
                 </Form.Select>
             </Form.Group>
             <div className="d-flex justify-content-end mt-4">
